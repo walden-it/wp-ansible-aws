@@ -1,0 +1,6 @@
+aws_instance_type: t2.micro
+aws_group_id: sg-76f9020b
+aws_region:   us-east-1
+aws_keypair:  winston
+aws_ami_image: ami-40d28157
+aws_vpc_subnet_id: subnet-e5cd16c8

@@ -1,0 +1,54 @@
+- name: create document root {{document_root}}
+  file: path={{document_root}} state=directory mode=0775
+
+- name: download wordpress
+  get_url:
+    url: "https://wordpress.org/latest.tar.gz"
+    dest: /tmp/wordpress.tar.gz
+    
+- name: uncompress wordpress
+  unarchive: src=/tmp/wordpress.tar.gz dest={{document_root}}  remote_src=yes
+
+- name: Copy wp-config-sample.php config.php
+  copy: src={{document_root}}/wordpress/wp-config-sample.php dest={{document_root}}/wordpress/wp-config.php  remote_src=yes
+  
+- name: configure mysql DB_NAME in wp-config.php
+  lineinfile: 
+    dest={{document_root}}/wordpress/wp-config.php 
+    state=present 
+    regexp="^define\(\'DB_NAME\'"
+    line="define('DB_NAME','{{mysql_db}}');"
+    
+- name: configure mysql DB_USER in wp-config.php    
+  lineinfile: 
+    dest={{document_root}}/wordpress/wp-config.php 
+    state=present 
+    regexp="^define\(\'DB_USER\'"
+    line="define('DB_USER','{{mysql_user}}');"
+    
+- name: configure mysql DB_PASSWORD in wp-config.php
+  lineinfile: 
+    dest={{document_root}}/wordpress/wp-config.php 
+    state=present 
+    regexp="^define\(\'DB_PASSWORD\'"
+    line="define('DB_PASSWORD','{{mysql_pass}}');"
+    
+- name: configure mysql DB_HOST in wp-config.php
+  lineinfile: 
+    dest={{document_root}}/wordpress/wp-config.php 
+    state=present 
+    regexp="^define\(\'DB_HOST\'"
+    line="define('DB_HOST','{{wprds.instance.endpoint}}');"
+   
+- name: FS_METHOD
+  lineinfile: 
+    dest="{{document_root}}/wordpress/wp-config.php" 
+    regexp="^define\(\'FS_METHOD\'"  
+    line="define('FS_METHOD', 'direct');"
+
+- name: unattended.sh 
+  template: src=unattended.sh dest=/tmp/unattended.sh mode=755    
+    
+- name: run unattended.sh
+  command: /tmp/unattended.sh
+      

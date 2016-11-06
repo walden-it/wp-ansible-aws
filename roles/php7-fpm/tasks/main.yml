@@ -1,0 +1,10 @@
+---
+- name: Install php-fpm 
+  apt: pkg=php-fpm state=installed update_cache=true
+  
+- name: Install php-mysql 
+  apt: pkg=php-mysql state=installed update_cache=true
+  
+- name: cgi.fix_pathinfo = 0
+  lineinfile: dest=/etc/php/7.0/fpm/php.ini state=present regexp="^cgi.fix_pathinfo " insertafter="^;cgi.fix_pathinfo " line="cgi.fix_pathinfo=0"
+  notify: restart php7.0-fpm

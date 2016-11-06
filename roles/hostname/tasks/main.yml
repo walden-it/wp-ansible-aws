@@ -1,0 +1,10 @@
+---
+
+- name: Generate /etc/hosts
+  template: src=hosts dest=/etc/hosts
+
+- name: Generate /etc/hostname
+  template: src=hostname dest=/etc/hostname
+
+- name: Set hostname
+  command: hostname {{hostname}}

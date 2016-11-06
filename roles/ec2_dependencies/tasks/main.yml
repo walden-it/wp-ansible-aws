@@ -1,0 +1,10 @@
+---
+- name: Install aptitude
+  command: apt-get install aptitude -y
+
+- name: upgrade packages
+  apt: upgrade=yes update_cache=yes cache_valid_time=300
+  become: True
+  
+- name: install python 2
+  raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)

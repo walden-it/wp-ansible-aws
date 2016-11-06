@@ -1,0 +1,34 @@
+---
+  
+- name: Create MySQL RDS for Wordpress
+  local_action:
+    module: rds
+    command: create
+    instance_name: wpdb      
+    db_engine: MySQL
+ #    wait: yes
+ #   wait_timeout: 600
+    size: 10
+    instance_type: db.m1.small
+    db_name:  "{{mysql_db}}"
+    username: "{{mysql_user}}"
+    password: "{{ lookup('password', 'credentials/{{ inventory_hostname }}/mysqlpassword length=15') }}"
+    tags:
+      Environment: testing
+      Application: walden
+  register: wprds	
+
+- name: Debug RDS facts
+  rds:
+    command: facts
+    instance_name: wpdb
+    region: us-east-1
+  register: rds_facts
+  until: not(rds_facts.instance.endpoint is none)
+  retries: 30
+  delay: 50
+
+- name: grab random password in memory for later use
+  command: echo "{{ lookup('file', 'credentials/{{ inventory_hostname }}/mysqlpassword') }}"
+  register: mysql_pass
+ 

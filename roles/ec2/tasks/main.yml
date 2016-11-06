@@ -1,0 +1,30 @@
+---
+- name: Create EC2 instance w/ public IP
+  local_action:
+    module: ec2
+    region: "{{ aws_region }}"
+    key_name: "{{ aws_keypair }}"
+    group_id: "{{ aws_group_id }}"
+    instance_type: "{{aws_instance_type}}"
+    image: "{{aws_ami_image}}"
+    vpc_subnet_id: "{{ aws_vpc_subnet_id }}"
+    instance_tags:
+          type: "wpawsdemo"
+          Name: "{{fqdn}}"
+    count_tag: Name
+    exact_count: 2
+    wait: yes
+    assign_public_ip: yes
+    user_data: |
+      #!/bin/bash
+      apt-get update
+      apt-get install -y python-simplejson
+  register: ec2
+    
+- name: Add new instance to host group
+  add_host: hostname={{ item.public_ip }} groupname=wpaws ansible_user=ubuntu ansible_ssh_private_key_file=../key.pem
+  with_items: '{{ec2.instances}}'
+
+- name: Wait for SSH
+  wait_for: host={{ item.public_dns_name}} port=22 delay=60 timeout=320 state=started
+  with_items: '{{ec2.instances}}'
