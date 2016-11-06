@@ -31,4 +31,4 @@
 - name: grab random password in memory for later use
   command: echo "{{ lookup('file', '../credentials/{{ inventory_hostname }}/mysqlpassword') }}"
   register: mysql_pass
- 
+ 	

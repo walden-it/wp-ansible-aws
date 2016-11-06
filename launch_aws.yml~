@@ -1,0 +1,14 @@
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - group_vars/mysql_rds.yml
+    - group_vars/ec2.yml
+  vars:
+    - domain: walden-it.com
+    - hostname: wpaws
+    - fqdn: "{{hostname}}.{{domain}}"
+
+  roles:
+  - rds
+  - ec2

@@ -13,16 +13,11 @@
   - rds
   - ec2
 
-  tasks:
-  - name: write rds enpoint
-    copy: content="{{wprds.instance.endpoint}}" dest="/tmp/endpoint"  
-
 - name: Install services
   hosts: tag_type_wpawsdemo
   become: True
   gather_facts: True
   vars_files:
-    - group_vars/all.yml
     - group_vars/mysql_rds.yml
     - group_vars/wordpress.yml
   vars:
@@ -31,7 +26,8 @@
     - fqdn: "{{hostname}}.{{domain}}"
     - wprds: "{{ hostvars['localhost']['wprds'] }}" 
     - mysql_pass: "{{hostvars['localhost']['mysql_pass']['stdout']}}"
-      
+    - document_root: /var/www/{{fqdn}}/htdocs
+
   pre_tasks:
     - name: install python 2
       raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)

@@ -1,0 +1,46 @@
+- hosts: localhost
+  connection: local
+  gather_facts: False
+  vars_files:
+    - group_vars/mysql_rds.yml
+    - group_vars/ec2.yml
+  vars:
+    - domain: walden-it.com
+    - hostname: wpaws
+    - fqdn: "{{hostname}}.{{domain}}"
+
+  roles:
+  - rds
+
+- name: Install services
+  hosts: tag_type_wpawsdemo
+  become: True
+  gather_facts: True
+  vars_files:
+    - group_vars/mysql_rds.yml
+    - group_vars/wordpress.yml
+  vars:
+    - domain: walden-it.com
+    - hostname: wpaws
+    - fqdn: "{{hostname}}.{{domain}}"
+    - wprds: "{{ hostvars['localhost']['wprds'] }}" 
+    - mysql_pass: "{{hostvars['localhost']['mysql_pass']['stdout']}}"
+    - document_root: /var/www/{{fqdn}}/htdocs
+
+  pre_tasks:
+    - name: install python 2
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+
+    - name: Install aptitude
+      command: apt-get install aptitude -y
+    
+    - name: upgrade packages
+      apt: upgrade=yes update_cache=yes cache_valid_time=300
+      become: True
+
+  roles:
+  - ec2_dependencies
+  - hostname
+  - php7-fpm
+  - nginx
+  - wordpress
